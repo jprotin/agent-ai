@@ -9,6 +9,16 @@ COMPOSE_FILE="docker-compose.yml"
 COMPOSE_FILE_SIMPLE="docker-compose.simple.yml"
 COMPOSE_FILE_NOHEALTH="docker-compose.nohealth.yml"
 
+# Détecter quelle commande docker-compose utiliser
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+elif docker compose version &> /dev/null 2>&1; then
+    DOCKER_COMPOSE="docker compose"
+else
+    echo "Erreur: ni 'docker-compose' ni 'docker compose' n'est disponible"
+    exit 1
+fi
+
 # Couleurs pour les messages
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -67,7 +77,7 @@ start_services() {
         npm install --package-lock-only
     fi
     
-    docker-compose -f $COMPOSE_FILE up -d
+    $DOCKER_COMPOSE -f $COMPOSE_FILE up -d
 
     print_message "Attente du démarrage complet..."
     print_message "- Ollama démarre (10-20 secondes)"
@@ -92,19 +102,19 @@ start_services() {
 # Arrêter les services
 stop_services() {
     print_message "Arrêt des services..."
-    docker-compose -f $COMPOSE_FILE down
+    $DOCKER_COMPOSE -f $COMPOSE_FILE down
     print_success "Services arrêtés!"
 }
 
 # Afficher les logs
 show_logs() {
-    docker-compose -f $COMPOSE_FILE logs -f
+    $DOCKER_COMPOSE -f $COMPOSE_FILE logs -f
 }
 
 # Afficher le statut
 show_status() {
     print_message "Statut des services:"
-    docker-compose -f $COMPOSE_FILE ps
+    $DOCKER_COMPOSE -f $COMPOSE_FILE ps
 }
 
 # Télécharger un modèle supplémentaire
@@ -118,20 +128,20 @@ pull_model() {
     fi
 
     print_message "Téléchargement du modèle $1..."
-    docker-compose -f $COMPOSE_FILE exec ollama ollama pull $1
+    $DOCKER_COMPOSE -f $COMPOSE_FILE exec ollama ollama pull $1
     print_success "Modèle $1 téléchargé avec succès!"
 }
 
 # Lister les modèles
 list_models() {
     print_message "Modèles installés:"
-    docker-compose -f $COMPOSE_FILE exec ollama ollama list
+    $DOCKER_COMPOSE -f $COMPOSE_FILE exec ollama ollama list
 }
 
 # Rebuild l'application
 rebuild() {
     print_message "Reconstruction de l'application..."
-    docker-compose -f $COMPOSE_FILE build --no-cache app
+    $DOCKER_COMPOSE -f $COMPOSE_FILE build --no-cache app
     print_success "Application reconstruite!"
 }
 
@@ -152,7 +162,7 @@ clean() {
         docker rm -f ai-agent-ollama ai-agent-ollama-setup ai-agent-app 2>/dev/null || true
         
         # Supprimer avec docker-compose
-        docker-compose -f $COMPOSE_FILE down -v 2>/dev/null || true
+        $DOCKER_COMPOSE -f $COMPOSE_FILE down -v 2>/dev/null || true
         
         # Nettoyer les conteneurs orphelins
         docker container prune -f 2>/dev/null || true
@@ -184,12 +194,12 @@ clean_containers() {
 
 # Shell interactif dans le conteneur app
 shell() {
-    docker-compose -f $COMPOSE_FILE exec app sh
+    $DOCKER_COMPOSE -f $COMPOSE_FILE exec app sh
 }
 
 # Shell interactif dans le conteneur ollama
 ollama_shell() {
-    docker-compose -f $COMPOSE_FILE exec ollama bash
+    $DOCKER_COMPOSE -f $COMPOSE_FILE exec ollama bash
 }
 
 # Afficher l'aide

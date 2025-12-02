@@ -112,13 +112,22 @@ Sois concis et structuré dans ton analyse.`;
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      
+      if (!data.content) {
+        throw new Error('No content in response');
+      }
+      
       addMessage('assistant', data.content);
       
       setSession(prev => ({ ...prev, phase: 'qa' }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing specification:', error);
-      addMessage('system', 'Erreur lors de l\'analyse de la spécification.');
+      addMessage('system', `Erreur lors de l'analyse: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setIsLoading(false);
     }
@@ -158,16 +167,26 @@ Phase actuelle: ${session.phase}`,
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      
+      // Vérifier que data.content existe
+      if (!data.content) {
+        throw new Error('No content in response');
+      }
+      
       addMessage('assistant', data.content);
 
-      // Détection automatique de code dans la réponse
-      if (data.content.includes('```') && session.phase === 'qa') {
+      // Détection automatique de code dans la réponse (avec vérification)
+      if (data.content && typeof data.content === 'string' && data.content.includes('```') && session.phase === 'qa') {
         setSession(prev => ({ ...prev, phase: 'generation' }));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
-      addMessage('system', 'Erreur lors de l\'envoi du message.');
+      addMessage('system', `Erreur lors de l'envoi du message: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setIsLoading(false);
     }
@@ -214,22 +233,37 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      
+      if (!data.content) {
+        throw new Error('No content in response');
+      }
+      
       addMessage('assistant', data.content);
 
       // Extraire et sauvegarder les blocs de code
       await extractAndSaveCode(data.content);
       
       setSession(prev => ({ ...prev, phase: 'complete' }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating code:', error);
-      addMessage('system', 'Erreur lors de la génération du code.');
+      addMessage('system', `Erreur lors de la génération: ${error.message || 'Erreur inconnue'}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   const extractAndSaveCode = async (content: string) => {
+    // Vérifier que content existe et est une string
+    if (!content || typeof content !== 'string') {
+      console.error('Invalid content for code extraction');
+      return;
+    }
+    
     // Expression régulière pour extraire les blocs de code
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
     let match;
