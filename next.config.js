@@ -6,6 +6,12 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  // Transpiler les modules si nécessaire
+  transpilePackages: [],
+  // Configurer les domaines d'images si utilisés
+  images: {
+    domains: [],
+  },
 }
 
 module.exports = nextConfig
