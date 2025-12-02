@@ -39,7 +39,6 @@ RUN mkdir -p /app/output && chown nextjs:nodejs /app/output
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/examples ./examples
 
 # Change ownership

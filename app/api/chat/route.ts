@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OllamaService, Message } from '@/lib/ollama';
+import { OllamaService, Message } from '@/app/lib/ollama';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
