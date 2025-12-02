@@ -112,18 +112,21 @@ Sois concis et structuré dans ton analyse.`;
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Afficher le message d'erreur du serveur
+        const errorMessage = data.error || `HTTP error! status: ${response.status}`;
+        const errorDetails = data.details || '';
+        throw new Error(`${errorMessage}\n${errorDetails}`);
       }
 
-      const data = await response.json();
-      
       if (!data.content) {
         throw new Error('No content in response');
       }
-      
+
       addMessage('assistant', data.content);
-      
+
       setSession(prev => ({ ...prev, phase: 'qa' }));
     } catch (error: any) {
       console.error('Error analyzing specification:', error);
@@ -167,17 +170,20 @@ Phase actuelle: ${session.phase}`,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Afficher le message d'erreur du serveur
+        const errorMessage = data.error || `HTTP error! status: ${response.status}`;
+        const errorDetails = data.details || '';
+        throw new Error(`${errorMessage}\n${errorDetails}`);
       }
 
-      const data = await response.json();
-      
       // Vérifier que data.content existe
       if (!data.content) {
         throw new Error('No content in response');
       }
-      
+
       addMessage('assistant', data.content);
 
       // Détection automatique de code dans la réponse (avec vérification)
@@ -233,16 +239,19 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Afficher le message d'erreur du serveur
+        const errorMessage = data.error || `HTTP error! status: ${response.status}`;
+        const errorDetails = data.details || '';
+        throw new Error(`${errorMessage}\n${errorDetails}`);
       }
 
-      const data = await response.json();
-      
       if (!data.content) {
         throw new Error('No content in response');
       }
-      
+
       addMessage('assistant', data.content);
 
       // Extraire et sauvegarder les blocs de code
