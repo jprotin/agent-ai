@@ -60,27 +60,73 @@ export class OllamaService {
   }
 
   /**
+   * Vérifie si un modèle spécifique est installé
+   */
+  async isModelInstalled(modelName?: string): Promise<boolean> {
+    try {
+      const models = await this.listModels();
+      const targetModel = modelName || this.model;
+
+      // Vérifier si le modèle exact ou une variante existe
+      const isInstalled = models.some(m =>
+        m === targetModel ||
+        m.startsWith(targetModel + ':') ||
+        m === targetModel + ':latest'
+      );
+
+      console.log(`[OllamaService] Model '${targetModel}' installed:`, isInstalled);
+      console.log(`[OllamaService] Available models:`, models);
+
+      return isInstalled;
+    } catch (error) {
+      console.error('Error checking model installation:', error);
+      return false;
+    }
+  }
+
+  /**
    * Envoie un message à Ollama et reçoit la réponse complète
    */
   async chat(messages: Message[]): Promise<string> {
     try {
+      const requestBody = {
+        model: this.model,
+        messages: messages,
+        stream: false,
+      };
+
+      console.log('[OllamaService] Sending chat request:', {
+        url: `${this.baseUrl}/api/chat`,
+        model: this.model,
+        messageCount: messages.length
+      });
+
       const response = await fetch(`${this.baseUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          model: this.model,
-          messages: messages,
-          stream: false,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        throw new Error(`Ollama error: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('[OllamaService] Error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+
+        // Si le modèle n'existe pas, donner un message plus explicite
+        if (response.status === 404) {
+          throw new Error(`Model '${this.model}' not found. Please ensure the model is installed with: docker exec ai-agent-ollama ollama pull ${this.model}`);
+        }
+
+        throw new Error(`Ollama error: ${response.statusText} - ${errorText}`);
       }
 
       const data: OllamaResponse = await response.json();
+      console.log('[OllamaService] Chat response received successfully');
       return data.message.content;
     } catch (error) {
       console.error('Error chatting with Ollama:', error);

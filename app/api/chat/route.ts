@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OllamaService, Message } from '@/lib/ollama';
+import { OllamaService, Message } from '@/app/lib/ollama';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -27,11 +27,26 @@ export async function POST(req: NextRequest) {
     if (!isConnected) {
       console.error('Ollama is not accessible');
       return NextResponse.json(
-        { 
+        {
           error: 'Cannot connect to Ollama. Please ensure Ollama is running.',
           details: 'Check that Ollama container is started and healthy.'
         },
         { status: 503 }
+      );
+    }
+
+    // Vérifier que le modèle est installé
+    const isModelInstalled = await ollama.isModelInstalled();
+    if (!isModelInstalled) {
+      console.error(`Model '${ollama.getModel()}' is not installed`);
+      const availableModels = await ollama.listModels();
+      return NextResponse.json(
+        {
+          error: `Model '${ollama.getModel()}' is not installed.`,
+          details: `Available models: ${availableModels.join(', ') || 'none'}. Please install the model with: docker exec ai-agent-ollama ollama pull ${ollama.getModel()}`,
+          availableModels
+        },
+        { status: 400 }
       );
     }
 
