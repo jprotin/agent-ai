@@ -30,7 +30,7 @@ export default function AIAgent() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
-  const [selectedModel, setSelectedModel] = useState('llama3');
+  const [selectedModel, setSelectedModel] = useState('qwen2.5-coder:1.5b');
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +62,32 @@ export default function AIAgent() {
     try {
       const response = await fetch('/api/chat?action=models');
       const data = await response.json();
-      setAvailableModels(data.models || []);
+      const models = data.models || [];
+      setAvailableModels(models);
+
+      // Si le modèle sélectionné n'est pas disponible, utiliser le premier disponible
+      if (models.length > 0 && !models.includes(selectedModel)) {
+        const preferredModels = [
+          'qwen2.5-coder:1.5b',
+          'deepseek-coder:1.3b',
+          'tinyllama',
+          'phi3:mini',
+          'codellama',
+          'llama3'
+        ];
+
+        // Chercher le premier modèle préféré disponible
+        const foundModel = preferredModels.find(m =>
+          models.some((am: string) => am === m || am.startsWith(m + ':'))
+        );
+
+        if (foundModel) {
+          setSelectedModel(foundModel);
+        } else {
+          // Sinon, utiliser le premier modèle disponible
+          setSelectedModel(models[0]);
+        }
+      }
     } catch (error) {
       console.error('Failed to load models:', error);
     }

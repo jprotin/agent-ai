@@ -55,39 +55,95 @@ install_model() {
 }
 
 # Proposer l'installation de différents modèles
-echo "Choisissez les modèles à installer:"
-echo "1. codellama (recommandé pour le code, ~3.8 GB)"
-echo "2. llama3 (modèle général performant, ~4.7 GB)"
-echo "3. qwen2.5-coder (excellent pour le code, ~4.7 GB)"
-echo "4. deepseek-coder (spécialisé code, ~3.8 GB)"
-echo "5. Tous les modèles ci-dessus"
-echo "6. Installer un modèle personnalisé"
+echo "┌─────────────────────────────────────────────────────────────┐"
+echo "│                    MODÈLES ULTRA LÉGERS                     │"
+echo "│              (Recommandés si < 4 GB RAM disponible)         │"
+echo "├─────────────────────────────────────────────────────────────┤"
+echo "│ 1. qwen2.5-coder:1.5b  (⭐ RECOMMANDÉ - Code, ~2 GB RAM)   │"
+echo "│ 2. deepseek-coder:1.3b (Code spécialisé, ~1.5 GB RAM)      │"
+echo "│ 3. tinyllama           (Ultra compact, ~1 GB RAM)          │"
+echo "│ 4. phi3:mini           (Performant, ~2.3 GB RAM)           │"
+echo "└─────────────────────────────────────────────────────────────┘"
+echo ""
+echo "┌─────────────────────────────────────────────────────────────┐"
+echo "│                    MODÈLES STANDARDS                        │"
+echo "│              (Nécessitent >= 6 GB RAM disponible)           │"
+echo "├─────────────────────────────────────────────────────────────┤"
+echo "│ 5. codellama           (Code général, ~5.5 GB RAM)         │"
+echo "│ 6. llama3              (Usage général, ~4.7 GB RAM)        │"
+echo "│ 7. qwen2.5-coder       (Excellent code, ~4.7 GB RAM)       │"
+echo "│ 8. deepseek-coder      (Code spécialisé, ~3.8 GB RAM)      │"
+echo "└─────────────────────────────────────────────────────────────┘"
+echo ""
+echo "┌─────────────────────────────────────────────────────────────┐"
+echo "│                         OPTIONS                             │"
+echo "├─────────────────────────────────────────────────────────────┤"
+echo "│ 9. Installer tous les modèles ultra légers (1-4)           │"
+echo "│ 10. Installer un modèle personnalisé                       │"
+echo "│ 0. Quitter                                                  │"
+echo "└─────────────────────────────────────────────────────────────┘"
 echo ""
 
-read -p "Votre choix (1-6): " choice
+read -p "Votre choix (0-10): " choice
 
 case $choice in
     1)
-        install_model "codellama"
+        install_model "qwen2.5-coder:1.5b"
         ;;
     2)
-        install_model "llama3"
+        install_model "deepseek-coder:1.3b"
         ;;
     3)
-        install_model "qwen2.5-coder"
+        install_model "tinyllama"
         ;;
     4)
-        install_model "deepseek-coder"
+        install_model "phi3:mini"
         ;;
     5)
-        install_model "codellama"
-        install_model "llama3"
-        install_model "qwen2.5-coder"
-        install_model "deepseek-coder"
+        echo "⚠️  Attention: codellama nécessite ~5.5 GB RAM"
+        read -p "Continuer? (o/n) " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Oo]$ ]]; then
+            install_model "codellama"
+        fi
         ;;
     6)
+        echo "⚠️  Attention: llama3 nécessite ~4.7 GB RAM"
+        read -p "Continuer? (o/n) " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Oo]$ ]]; then
+            install_model "llama3"
+        fi
+        ;;
+    7)
+        echo "⚠️  Attention: qwen2.5-coder nécessite ~4.7 GB RAM"
+        read -p "Continuer? (o/n) " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Oo]$ ]]; then
+            install_model "qwen2.5-coder"
+        fi
+        ;;
+    8)
+        echo "⚠️  Attention: deepseek-coder nécessite ~3.8 GB RAM"
+        read -p "Continuer? (o/n) " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Oo]$ ]]; then
+            install_model "deepseek-coder"
+        fi
+        ;;
+    9)
+        install_model "qwen2.5-coder:1.5b"
+        install_model "deepseek-coder:1.3b"
+        install_model "tinyllama"
+        install_model "phi3:mini"
+        ;;
+    10)
         read -p "Nom du modèle: " custom_model
         install_model "$custom_model"
+        ;;
+    0)
+        echo "Installation annulée"
+        exit 0
         ;;
     *)
         echo "Choix invalide"

@@ -39,12 +39,28 @@ services:
         echo 'Tentative $$i/30...' &&
         sleep 2
       done &&
-      echo 'Téléchargement du modèle codellama...' &&
-      ollama pull codellama &&
-      echo 'Modèle codellama téléchargé avec succès!' &&
+      echo 'Téléchargement du modèle qwen2.5-coder:1.5b (léger, adapté aux systèmes avec peu de RAM)...' &&
+      ollama pull qwen2.5-coder:1.5b &&
+      echo 'Modèle qwen2.5-coder:1.5b téléchargé avec succès!' &&
+      echo '' &&
+      echo '✓ Installation terminée!' &&
+      echo '' &&
+      echo 'Ce modèle nécessite seulement ~2 GB de RAM.' &&
+      echo '' &&
       echo 'Vous pouvez également télécharger d autres modèles:' &&
-      echo '  - ollama pull llama3' &&
-      echo '  - ollama pull deepseek-coder' &&
+      echo '  Modèles légers (< 4 GB RAM):' &&
+      echo '    - ollama pull deepseek-coder:1.3b' &&
+      echo '    - ollama pull tinyllama' &&
+      echo '    - ollama pull phi3:mini' &&
+      echo '' &&
+      echo '  Modèles standards (>= 6 GB RAM):' &&
+      echo '    - ollama pull codellama' &&
+      echo '    - ollama pull llama3' &&
+      echo '    - ollama pull qwen2.5-coder' &&
+      echo '' &&
+      echo 'Pour installer d autres modèles, utilisez:' &&
+      echo '  ./install-models.sh' &&
+      echo '' &&
       echo 'Configuration terminée!'
       "
     restart: "no"
@@ -62,6 +78,7 @@ services:
     environment:
       - NODE_ENV=production
       - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=qwen2.5-coder:1.5b
     volumes:
       # Monter le répertoire output pour accéder aux fichiers générés
       - ./output:/app/output
