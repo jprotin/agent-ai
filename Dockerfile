@@ -17,6 +17,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Create public directory if it doesn't exist
+RUN mkdir -p /app/public
+
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -36,9 +39,12 @@ RUN adduser --system --uid 1001 nextjs
 RUN mkdir -p /app/output && chown nextjs:nodejs /app/output
 
 # Copy necessary files
-COPY --from=builder /app/public ./public
+# Copy standalone build
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Copy public and examples directories
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/examples ./examples
 
 # Change ownership
