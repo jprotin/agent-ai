@@ -1,0 +1,22 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copier tous les fichiers
+COPY package.json ./
+COPY . .
+
+# Installer les dépendances
+RUN npm install
+
+# Build Next.js
+RUN npm run build
+
+# Créer le répertoire output
+RUN mkdir -p /app/output
+
+# Exposer le port
+EXPOSE 3000
+
+# Démarrer l'application
+CMD ["npm", "start"]
