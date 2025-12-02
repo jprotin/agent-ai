@@ -18,10 +18,11 @@ export class OllamaService {
   private baseUrl: string;
   private model: string;
 
-  constructor(baseUrl?: string, model: string = 'codellama') {
+  constructor(baseUrl?: string, model: string = 'qwen2.5-coder:1.5b') {
     // Utiliser la variable d'environnement si disponible (Docker), sinon localhost
     this.baseUrl = baseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-    this.model = model;
+    // Utiliser la variable d'environnement pour le modèle si disponible
+    this.model = process.env.OLLAMA_MODEL || model;
     
     console.log('[OllamaService] Initialized with:');
     console.log('  - Base URL:', this.baseUrl);
