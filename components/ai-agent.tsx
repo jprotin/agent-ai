@@ -297,7 +297,7 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
       console.error('Invalid content for code extraction');
       return;
     }
-    
+
     // Expression régulière pour extraire les blocs de code
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
     let match;
@@ -306,14 +306,60 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
     while ((match = codeBlockRegex.exec(content)) !== null) {
       const language = match[1] || 'txt';
       const code = match[2];
-      
+
       // Extraire le nom de fichier si mentionné avant le bloc
       const beforeBlock = content.substring(0, match.index);
-      const filenameMatch = beforeBlock.match(/(?:fichier|file|filename)[\s:]+([^\n]+)/i);
-      
-      const filename = filenameMatch 
-        ? filenameMatch[1].trim()
-        : `generated_${fileIndex}.${language}`;
+
+      // Chercher le nom de fichier dans différents formats
+      let filename: string | null = null;
+
+      // 1. Chercher dans des backticks (ex: `index.html`)
+      const backtickMatch = beforeBlock.match(/`([a-zA-Z0-9_\-\.]+\.[a-z]{2,4})`/i);
+      if (backtickMatch) {
+        filename = backtickMatch[1];
+      }
+
+      // 2. Chercher après "fichier:" ou "file:" (ex: "fichier: index.html")
+      if (!filename) {
+        const fileMatch = beforeBlock.match(/(?:fichier|file|filename)[\s:]+([a-zA-Z0-9_\-\.]+\.[a-z]{2,4})/i);
+        if (fileMatch) {
+          filename = fileMatch[1];
+        }
+      }
+
+      // 3. Chercher un nom de fichier valide proche du bloc (dans les 200 derniers caractères)
+      if (!filename) {
+        const nearBlock = beforeBlock.slice(-200);
+        const filenamePatternMatch = nearBlock.match(/([a-zA-Z0-9_\-]+\.[a-z]{2,4})/i);
+        if (filenamePatternMatch) {
+          filename = filenamePatternMatch[1];
+        }
+      }
+
+      // 4. Nom par défaut si aucun nom trouvé
+      if (!filename) {
+        const extensions: Record<string, string> = {
+          'javascript': 'js',
+          'typescript': 'ts',
+          'python': 'py',
+          'html': 'html',
+          'css': 'css',
+          'json': 'json',
+          'jsx': 'jsx',
+          'tsx': 'tsx',
+        };
+        const ext = extensions[language.toLowerCase()] || language || 'txt';
+        filename = `generated_${fileIndex}.${ext}`;
+      }
+
+      // Nettoyer le nom de fichier (supprimer les caractères invalides)
+      filename = filename.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+
+      // Limiter la longueur du nom de fichier
+      if (filename.length > 100) {
+        const ext = filename.split('.').pop() || 'txt';
+        filename = `file_${fileIndex}.${ext}`;
+      }
 
       try {
         const response = await fetch('/api/generate-code', {
@@ -327,7 +373,7 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
         });
 
         const data = await response.json();
-        
+
         if (data.success) {
           setSession(prev => ({
             ...prev,
@@ -336,9 +382,13 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
               { name: filename, path: data.path },
             ],
           }));
+        } else if (data.error) {
+          console.error('Error from generate-code API:', data.error);
+          addMessage('system', `Erreur lors de la sauvegarde de ${filename}: ${data.error}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error saving code file:', error);
+        addMessage('system', `Erreur lors de la sauvegarde du fichier: ${error.message}`);
       }
 
       fileIndex++;
