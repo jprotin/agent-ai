@@ -623,165 +623,163 @@ diagnose() {
 # ═══════════════════════════════════════════════════════════════════════════
 
 show_help() {
-    cat << EOF
 
-${CYAN}═══════════════════════════════════════════════════════════════${NC}
-${CYAN}        AGENT IA DE DÉVELOPPEMENT - GUIDE COMPLET${NC}
-${CYAN}═══════════════════════════════════════════════════════════════${NC}
+echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
+echo -e "${CYAN}        AGENT IA DE DÉVELOPPEMENT - GUIDE COMPLET${NC}"
+echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 
-${YELLOW}USAGE:${NC}
-  ./start.sh [commande]
+echo -e "${YELLOW}USAGE:${NC}"
+echo -e "  ./start.sh [commande]"
 
-${YELLOW}COMMANDES PRINCIPALES:${NC}
+echo -e "${YELLOW}COMMANDES PRINCIPALES:${NC}"
 
-  ${GREEN}start${NC}
-    Démarre tous les services Docker (Ollama + Application)
-    - Télécharge automatiquement le modèle par défaut
-    - Lance l'application sur http://localhost:3000
-    - Lance l'API Ollama sur http://localhost:11434
-    ${CYAN}Exemple: ./start.sh start${NC}
+echo -e "  ${GREEN}start${NC}"
+echo -e "    Démarre tous les services Docker (Ollama + Application)${NC}"
+echo -e "    - Télécharge automatiquement le modèle par défaut${NC}"
+echo -e "    - Lance l'application sur http://localhost:3000${NC}"
+echo -e "    - Lance l'API Ollama sur http://localhost:11434${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh start${NC}"
 
-  ${GREEN}stop${NC}
-    Arrête tous les services en cours d'exécution
-    - Conserve les volumes (modèles téléchargés)
-    - Arrête proprement tous les conteneurs
-    ${CYAN}Exemple: ./start.sh stop${NC}
+echo -e "  ${GREEN}stop${NC}"
+echo -e "    Arrête tous les services en cours d'exécution${NC}"
+echo -e "    - Conserve les volumes (modèles téléchargés)${NC}"
+echo -e "    - Arrête proprement tous les conteneurs${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh stop${NC}"
 
-  ${GREEN}restart${NC}
-    Redémarre tous les services
-    - Équivalent à stop puis start
-    ${CYAN}Exemple: ./start.sh restart${NC}
+echo -e "  ${GREEN}restart${NC}"
+echo -e "    Redémarre tous les services${NC}"
+echo -e "    - Équivalent à stop puis start${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh restart${NC}"
 
-${YELLOW}COMMANDES DE MONITORING:${NC}
+echo -e "${YELLOW}COMMANDES DE MONITORING:${NC}"
 
-  ${GREEN}logs${NC}
-    Affiche les logs en temps réel de tous les services
-    - Utile pour le débogage
-    - Appuyez sur Ctrl+C pour quitter
-    ${CYAN}Exemple: ./start.sh logs${NC}
+echo -e "  ${GREEN}logs${NC}"
+echo -e "    Affiche les logs en temps réel de tous les services${NC}"
+echo -e "    - Utile pour le débogage${NC}"
+echo -e "    - Appuyez sur Ctrl+C pour quitter${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh logs${NC}"
 
-  ${GREEN}status${NC}
-    Affiche le statut de tous les services
-    - Montre si les conteneurs sont en cours d'exécution
-    - Vérifie la connectivité Ollama
-    ${CYAN}Exemple: ./start.sh status${NC}
+echo -e "  ${GREEN}status${NC}"
+echo -e "    Affiche le statut de tous les services${NC}"
+echo -e "    - Montre si les conteneurs sont en cours d'exécution${NC}"
+echo -e "    - Vérifie la connectivité Ollama${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh status${NC}"
 
-  ${GREEN}diagnose${NC}
-    Effectue un diagnostic complet du système
-    - Vérifie Docker, les conteneurs, Ollama
-    - Liste les modèles installés
-    - Affiche la RAM disponible
-    - Montre les logs récents
-    ${CYAN}Exemple: ./start.sh diagnose${NC}
+echo -e "  ${GREEN}diagnose${NC}"
+echo -e "    Effectue un diagnostic complet du système${NC}"
+echo -e "    - Vérifie Docker, les conteneurs, Ollama${NC}"
+echo -e "    - Liste les modèles installés${NC}"
+echo -e "    - Affiche la RAM disponible${NC}"
+echo -e "    - Montre les logs récents${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh diagnose${NC}"
 
-${YELLOW}COMMANDES DE GESTION DES MODÈLES LLM:${NC}
+echo -e "${YELLOW}COMMANDES DE GESTION DES MODÈLES LLM:${NC}"
 
-  ${GREEN}install-model${NC}
-    Menu interactif pour installer des modèles LLM
-    - Détecte automatiquement votre RAM
-    - Propose uniquement les modèles compatibles
-    - Installation guidée étape par étape
-    ${CYAN}Exemple: ./start.sh install-model${NC}
+echo -e "  ${GREEN}install-model${NC}"
+echo -e "    Menu interactif pour installer des modèles LLM${NC}"
+echo -e "    - Détecte automatiquement votre RAM${NC}"
+echo -e "    - Propose uniquement les modèles compatibles${NC}"
+echo -e "    - Installation guidée étape par étape${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh install-model${NC}"
 
-  ${GREEN}list-models${NC}
-    Liste tous les modèles Ollama installés
-    - Affiche le nom, la taille et la date de modification
-    ${CYAN}Exemple: ./start.sh list-models${NC}
+echo -e "  ${GREEN}list-models${NC}"
+echo -e "    Liste tous les modèles Ollama installés${NC}"
+echo -e "    - Affiche le nom, la taille et la date de modification${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh list-models${NC}"
 
-  ${GREEN}show-compatible${NC}
-    Affiche tous les modèles compatibles avec votre RAM
-    - Détecte automatiquement votre RAM disponible
-    - Catégorise par niveau de RAM requis
-    ${CYAN}Exemple: ./start.sh show-compatible${NC}
+echo -e "  ${GREEN}show-compatible${NC}"
+echo -e "    Affiche tous les modèles compatibles avec votre RAM${NC}"
+echo -e "    - Détecte automatiquement votre RAM disponible${NC}"
+echo -e "    - Catégorise par niveau de RAM requis${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh show-compatible${NC}"
 
-  ${GREEN}system-info${NC}
-    Affiche les informations système
-    - RAM totale disponible
-    - Système d'exploitation
-    - Recommandations de modèles
-    ${CYAN}Exemple: ./start.sh system-info${NC}
+echo -e "  ${GREEN}system-info${NC}"
+echo -e "    Affiche les informations système${NC}"
+echo -e "    - RAM totale disponible${NC}"
+echo -e "    - Système d'exploitation${NC}"
+echo -e "    - Recommandations de modèles${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh system-info${NC}"
 
-${YELLOW}COMMANDES DE MAINTENANCE:${NC}
+echo -e "${YELLOW}COMMANDES DE MAINTENANCE:${NC}"
 
-  ${GREEN}rebuild${NC}
-    Reconstruit l'image Docker de l'application
-    - Utile après modification du code
-    - Force une reconstruction complète (--no-cache)
-    ${CYAN}Exemple: ./start.sh rebuild${NC}
+echo -e "  ${GREEN}rebuild${NC}"
+echo -e "    Reconstruit l'image Docker de l'application${NC}"
+echo -e "    - Utile après modification du code${NC}"
+echo -e "    - Force une reconstruction complète (--no-cache)${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh rebuild${NC}"
 
-  ${GREEN}clean-containers${NC}
-    Nettoie seulement les conteneurs
-    - Conserve les volumes (modèles)
-    - Utile en cas de conteneurs corrompus
-    ${CYAN}Exemple: ./start.sh clean-containers${NC}
+echo -e "  ${GREEN}clean-containers${NC}"
+echo -e "    Nettoie seulement les conteneurs${NC}"
+echo -e "    - Conserve les volumes (modèles)${NC}"
+echo -e "    - Utile en cas de conteneurs corrompus${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh clean-containers${NC}"
 
-  ${GREEN}clean${NC}
-    Nettoyage complet du système
-    ${RED}⚠️  ATTENTION: Supprime TOUT (conteneurs, images, volumes)${NC}
-    - Vous perdrez tous les modèles téléchargés
-    - Demande confirmation avant suppression
-    ${CYAN}Exemple: ./start.sh clean${NC}
+echo -e "  ${GREEN}clean${NC}"
+echo -e "    Nettoyage complet du système${NC}"
+echo -e "    ${RED}⚠️  ATTENTION: Supprime TOUT (conteneurs, images, volumes)${NC}"
+echo -e "    - Vous perdrez tous les modèles téléchargés${NC}"
+echo -e "    - Demande confirmation avant suppression${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh clean${NC}"
 
-${YELLOW}COMMANDES AVANCÉES:${NC}
+echo -e "${YELLOW}COMMANDES AVANCÉES:${NC}"
 
-  ${GREEN}shell${NC}
-    Ouvre un shell interactif dans le conteneur de l'application
-    - Utile pour le débogage avancé
-    - Accès direct au filesystem du conteneur
-    ${CYAN}Exemple: ./start.sh shell${NC}
+echo -e "  ${GREEN}shell${NC}"
+echo -e "    Ouvre un shell interactif dans le conteneur de l'application${NC}"
+echo -e "    - Utile pour le débogage avancé${NC}"
+echo -e "    - Accès direct au filesystem du conteneur${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh shell${NC}"
 
-  ${GREEN}ollama-shell${NC}
-    Ouvre un shell interactif dans le conteneur Ollama
-    - Permet d'exécuter des commandes Ollama directement
-    ${CYAN}Exemple: ./start.sh ollama-shell${NC}
+echo -e "  ${GREEN}ollama-shell${NC}"
+echo -e "    Ouvre un shell interactif dans le conteneur Ollama${NC}"
+echo -e "    - Permet d'exécuter des commandes Ollama directement${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh ollama-shell${NC}"
 
-  ${GREEN}help${NC}
-    Affiche cette aide complète
-    ${CYAN}Exemple: ./start.sh help${NC}
+echo -e "  ${GREEN}help${NC}"
+echo -e "    Affiche cette aide complète${NC}"
+echo -e "    ${CYAN}Exemple: ./start.sh help${NC}"
 
-${YELLOW}EXEMPLES D'UTILISATION COURANTS:${NC}
+echo -e "${YELLOW}EXEMPLES D'UTILISATION COURANTS:${NC}"
 
-  ${CYAN}# Démarrage initial${NC}
-  ./start.sh start
+echo -e "  ${CYAN}# Démarrage initial${NC}"
+echo -e "  ./start.sh start${NC}"
 
-  ${CYAN}# Installer un modèle compatible avec votre RAM${NC}
-  ./start.sh install-model
+echo -e "  ${CYAN}# Installer un modèle compatible avec votre RAM${NC}"
+echo -e "  ./start.sh install-model${NC}"
 
-  ${CYAN}# Vérifier que tout fonctionne${NC}
-  ./start.sh diagnose
+echo -e "  ${CYAN}# Vérifier que tout fonctionne${NC}"
+echo -e "  ./start.sh diagnose${NC}"
 
-  ${CYAN}# Voir les logs en temps réel${NC}
-  ./start.sh logs
+echo -e "  ${CYAN}# Voir les logs en temps réel${NC}"
+echo -e "  ./start.sh logs${NC}"
 
-  ${CYAN}# Nettoyer et redémarrer proprement${NC}
-  ./start.sh clean-containers
-  ./start.sh start
+echo -e "  ${CYAN}# Nettoyer et redémarrer proprement${NC}"
+echo -e "  ./start.sh clean-containers${NC}"
+echo -e "  ./start.sh start${NC}"
 
-${YELLOW}RÉSOLUTION DE PROBLÈMES:${NC}
+echo -e "${YELLOW}RÉSOLUTION DE PROBLÈMES:${NC}"
 
-  ${RED}Problème:${NC} Erreur 500 sur l'application
-  ${GREEN}Solution:${NC} ./start.sh diagnose
-             Vérifiez qu'au moins un modèle est installé
-             ./start.sh install-model
+echo -e "  ${RED}Problème:${NC} Erreur 500 sur l'application${NC}"
+echo -e "  ${GREEN}Solution:${NC} ./start.sh diagnose${NC}"
+echo -e "             Vérifiez qu'au moins un modèle est installé${NC}"
+echo -e "             ./start.sh install-model${NC}"
 
-  ${RED}Problème:${NC} Les conteneurs ne démarrent pas
-  ${GREEN}Solution:${NC} ./start.sh clean-containers
-             ./start.sh start
+echo -e "  ${RED}Problème:${NC} Les conteneurs ne démarrent pas${NC}"
+echo -e "  ${GREEN}Solution:${NC} ./start.sh clean-containers${NC}"
+echo -e "             ./start.sh start${NC}"
 
-  ${RED}Problème:${NC} Modèle trop lourd pour votre RAM
-  ${GREEN}Solution:${NC} ./start.sh show-compatible
-             Installez un modèle ultra-léger (ex: qwen2.5-coder:1.5b)
+echo -e "  ${RED}Problème:${NC} Modèle trop lourd pour votre RAM${NC}"
+echo -e "  ${GREEN}Solution:${NC} ./start.sh show-compatible${NC}"
+echo -e "             Installez un modèle ultra-léger (ex: qwen2.5-coder:1.5b)${NC}"
 
-${YELLOW}INFORMATIONS:${NC}
+echo -e "${YELLOW}INFORMATIONS:${NC}"
 
-  ${BLUE}Documentation:${NC}  README.md
-  ${BLUE}Logs:${NC}           docker-compose logs -f
-  ${BLUE}Application:${NC}    http://localhost:3000
-  ${BLUE}API Ollama:${NC}     http://localhost:11434
+echo -e "  ${BLUE}Documentation:${NC}  README.md${NC}"
+echo -e "  ${BLUE}Logs:${NC}           docker-compose logs -f${NC}"
+echo -e "  ${BLUE}Application:${NC}    http://localhost:3000${NC}"
+echo -e "  ${BLUE}API Ollama:${NC}     http://localhost:11434${NC}"
 
-${CYAN}═══════════════════════════════════════════════════════════════${NC}
+echo -e "${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 
-EOF
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
