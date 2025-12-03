@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Send, Loader2, CheckCircle, AlertCircle, Code, Download } from 'lucide-react';
+import { FileText, Send, Loader2, CheckCircle, AlertCircle, Code, Download, Archive } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -19,6 +19,7 @@ interface SessionState {
   specification?: string;
   messages: Message[];
   generatedFiles: Array<{ name: string; path: string }>;
+  sessionDirectory?: string;
 }
 
 export default function AIAgent() {
@@ -118,11 +119,12 @@ export default function AIAgent() {
     
     const systemPrompt = `Tu es un architecte logiciel expert. Analyse cette spécification fonctionnelle et :
 1. Identifie les fonctionnalités principales
-2. Propose une architecture technique
-3. Liste les questions à clarifier avec le client
-4. Suggère les technologies appropriées
+2. Propose une architecture technique claire et modulaire
+3. Liste les questions essentielles à clarifier avec le client
+4. Suggère les technologies appropriées avec justification
+5. Identifie les fichiers qui devront être créés (code + documentation)
 
-Sois concis et structuré dans ton analyse.`;
+Sois concis, structuré et précis dans ton analyse. Pense à la documentation dès le début.`;
 
     try {
       const response = await fetch('/api/chat', {
@@ -175,9 +177,14 @@ Sois concis et structuré dans ton analyse.`;
         {
           role: 'system' as const,
           content: `Tu es un assistant de développement expert. Aide l'utilisateur à clarifier ses besoins et génère du code de haute qualité.
-          
+
 Contexte: ${session.specification ? 'Spécification fournie' : 'Pas de spécification'}
-Phase actuelle: ${session.phase}`,
+Phase actuelle: ${session.phase}
+
+Quand tu génères du code, assure-toi TOUJOURS de :
+- Inclure des commentaires détaillés en français dans le code
+- Générer un fichier README.md complet avec instructions
+- Expliquer la logique et les décisions techniques`,
         },
         ...session.messages.map(m => ({
           role: m.role as 'user' | 'assistant' | 'system',
@@ -233,12 +240,46 @@ Phase actuelle: ${session.phase}`,
 
     const codePrompt = `Basé sur notre conversation et la spécification fournie, génère le code complet et prêt à l'emploi.
 
-Structure ta réponse ainsi:
-1. Nom du fichier (ex: app.py, main.js, etc.)
-2. Le code complet entre des balises \`\`\`
-3. Instructions d'installation/exécution si nécessaire
+IMPORTANT : Tu DOIS générer les fichiers suivants:
 
-Génère du code production-ready avec gestion d'erreurs et commentaires.`;
+📁 **FICHIERS DE CODE SOURCE** avec :
+- Commentaires détaillés en français pour CHAQUE fonction/classe/composant
+- Commentaires JSDoc, docstrings ou équivalent selon le langage
+- Commentaires explicatifs pour toute logique complexe
+- Headers de fichier avec description, auteur, date
+- Gestion d'erreurs complète avec messages clairs
+
+📄 **README.md** (OBLIGATOIRE) contenant :
+- Titre et description du projet
+- Architecture et structure des fichiers
+- Prérequis système et dépendances
+- Instructions d'installation pas à pas
+- Guide d'utilisation avec exemples concrets
+- Commandes pour lancer/tester le projet
+- Variables d'environnement si nécessaire
+- Problèmes connus et solutions
+
+📚 **DOCUMENTATION.md** (pour projets complexes) avec :
+- Architecture technique détaillée
+- Diagrammes (format texte/ASCII ou Mermaid)
+- Choix de conception et justifications
+- Documentation API si applicable
+- Guide de contribution
+- Explication des patterns utilisés
+
+⚙️ **Fichiers de configuration** si nécessaire :
+- package.json, requirements.txt, etc.
+- .env.example avec description des variables
+- Fichiers de configuration (nginx, docker, etc.)
+
+STRUCTURE DE TA RÉPONSE :
+Pour chaque fichier, utilise ce format :
+**nom_du_fichier.ext**
+\`\`\`langage
+[code ici]
+\`\`\`
+
+Génère du code production-ready, propre, sécurisé et maintenable.`;
 
     try {
       addMessage('user', codePrompt);
@@ -246,7 +287,14 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
       const messages = [
         {
           role: 'system' as const,
-          content: 'Tu es un développeur expert. Génère du code propre, testé et documenté.',
+          content: `Tu es un développeur expert senior. Génère du code de qualité professionnelle avec :
+- Code propre et maintenable suivant les best practices
+- Commentaires détaillés en français dans TOUS les fichiers
+- Documentation complète (README.md OBLIGATOIRE + DOCUMENTATION.md si projet complexe)
+- Gestion d'erreurs robuste
+- Nommage clair et explicite des variables/fonctions
+- Structure de fichiers logique et organisée
+Tu ne génères JAMAIS de code sans commentaires ni documentation.`,
         },
         ...session.messages.map(m => ({
           role: m.role as 'user' | 'assistant' | 'system',
@@ -298,6 +346,9 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
       return;
     }
 
+    // Créer le répertoire de session (une seule fois pour tous les fichiers)
+    const sessionDir = `session_${Date.now()}`;
+
     // Expression régulière pour extraire les blocs de code
     const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
     let match;
@@ -313,13 +364,21 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
       // Chercher le nom de fichier dans différents formats
       let filename: string | null = null;
 
-      // 1. Chercher dans des backticks (ex: `index.html`)
-      const backtickMatch = beforeBlock.match(/`([a-zA-Z0-9_\-\.]+\.[a-z]{2,4})`/i);
-      if (backtickMatch) {
-        filename = backtickMatch[1];
+      // 1. Chercher en gras avec ** (ex: **README.md** ou **app.py**)
+      const boldMatch = beforeBlock.match(/\*\*([a-zA-Z0-9_\-\.]+\.[a-z]{2,4})\*\*/i);
+      if (boldMatch) {
+        filename = boldMatch[1];
       }
 
-      // 2. Chercher après "fichier:" ou "file:" (ex: "fichier: index.html")
+      // 2. Chercher dans des backticks (ex: `index.html`)
+      if (!filename) {
+        const backtickMatch = beforeBlock.match(/`([a-zA-Z0-9_\-\.]+\.[a-z]{2,4})`/i);
+        if (backtickMatch) {
+          filename = backtickMatch[1];
+        }
+      }
+
+      // 3. Chercher après "fichier:" ou "file:" (ex: "fichier: index.html")
       if (!filename) {
         const fileMatch = beforeBlock.match(/(?:fichier|file|filename)[\s:]+([a-zA-Z0-9_\-\.]+\.[a-z]{2,4})/i);
         if (fileMatch) {
@@ -327,7 +386,7 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
         }
       }
 
-      // 3. Chercher un nom de fichier valide proche du bloc (dans les 200 derniers caractères)
+      // 4. Chercher un nom de fichier valide proche du bloc (dans les 200 derniers caractères)
       if (!filename) {
         const nearBlock = beforeBlock.slice(-200);
         const filenamePatternMatch = nearBlock.match(/([a-zA-Z0-9_\-]+\.[a-z]{2,4})/i);
@@ -336,7 +395,7 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
         }
       }
 
-      // 4. Nom par défaut si aucun nom trouvé
+      // 5. Nom par défaut si aucun nom trouvé
       if (!filename) {
         const extensions: Record<string, string> = {
           'javascript': 'js',
@@ -368,7 +427,7 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
           body: JSON.stringify({
             code,
             filename,
-            directory: `session_${Date.now()}`,
+            directory: sessionDir,
           }),
         });
 
@@ -377,6 +436,7 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
         if (data.success) {
           setSession(prev => ({
             ...prev,
+            sessionDirectory: sessionDir,
             generatedFiles: [
               ...prev.generatedFiles,
               { name: filename, path: data.path },
@@ -403,6 +463,74 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
         { role, content, timestamp: new Date() },
       ],
     }));
+  };
+
+  /**
+   * Télécharge un fichier individuel
+   */
+  const downloadFile = async (filename: string, filepath: string) => {
+    try {
+      const response = await fetch(`/api/download?file=${encodeURIComponent(filepath)}`);
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erreur lors du téléchargement');
+      }
+
+      // Créer un blob et déclencher le téléchargement
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error: any) {
+      console.error('Erreur lors du téléchargement:', error);
+      addMessage('system', `Erreur lors du téléchargement de ${filename}: ${error.message}`);
+    }
+  };
+
+  /**
+   * Télécharge tous les fichiers générés en ZIP
+   */
+  const downloadAllAsZip = async () => {
+    if (!session.sessionDirectory) {
+      addMessage('system', 'Aucun fichier à télécharger');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/download-zip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionDirectory: session.sessionDirectory,
+          projectName: 'code-genere',
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erreur lors de la création du ZIP');
+      }
+
+      // Créer un blob et déclencher le téléchargement
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `code-genere-${new Date().toISOString().slice(0, 10)}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error: any) {
+      console.error('Erreur lors du téléchargement du ZIP:', error);
+      addMessage('system', `Erreur lors du téléchargement du ZIP: ${error.message}`);
+    }
   };
 
   const resetSession = () => {
@@ -610,10 +738,25 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
         <TabsContent value="files">
           <Card>
             <CardHeader>
-              <CardTitle>Fichiers Générés</CardTitle>
-              <CardDescription>
-                Les fichiers de code générés par l'agent
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Fichiers Générés</CardTitle>
+                  <CardDescription>
+                    Les fichiers de code générés par l'agent
+                  </CardDescription>
+                </div>
+                {session.generatedFiles.length > 0 && (
+                  <Button
+                    onClick={downloadAllAsZip}
+                    variant="default"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Archive className="h-4 w-4" />
+                    Télécharger tout en ZIP
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {session.generatedFiles.length === 0 ? (
@@ -636,7 +779,12 @@ Génère du code production-ready avec gestion d'erreurs et commentaires.`;
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => downloadFile(file.name, file.path)}
+                        title={`Télécharger ${file.name}`}
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
                     </div>
